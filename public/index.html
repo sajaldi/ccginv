@@ -144,7 +144,8 @@
                 } else {
                     const text = await response.text();
                     console.error('Expected JSON but received:', text);
-                    throw new Error(`Error del servidor (no JSON): ${text.substring(0, 100)}...`);
+                    const snippet = text.trim() ? text.substring(0, 200) : "[Cuerpo vacío]";
+                    throw new Error(`El servidor respondió con HTML/Texto (ver consola): ${snippet}`);
                 }
 
                 if (!response.ok) {
