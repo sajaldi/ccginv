@@ -15,8 +15,9 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static('public'));
 
-app.get('/', (req, res) => {
-    res.send('Server is running');
+// Health check for Coolify
+app.get('/health', (req, res) => {
+    res.status(200).send('OK');
 });
 
 // Endpoint to get all assets (activos) with pagination
@@ -49,6 +50,6 @@ app.get('/activos', async (req, res) => {
     }
 });
 
-app.listen(port, () => {
+app.listen(port, '0.0.0.0', () => {
     console.log(`Server running on port ${port}`);
 });
