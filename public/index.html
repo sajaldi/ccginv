@@ -136,7 +136,16 @@
         async function fetchActivos(page = 1) {
             try {
                 const response = await fetch(`/activos?page=${page}&limit=${limit}`);
-                const responseData = await response.json();
+                const contentType = response.headers.get("content-type");
+
+                let responseData;
+                if (contentType && contentType.includes("application/json")) {
+                    responseData = await response.json();
+                } else {
+                    const text = await response.text();
+                    console.error('Expected JSON but received:', text);
+                    throw new Error(`Error del servidor (no JSON): ${text.substring(0, 100)}...`);
+                }
 
                 if (!response.ok) {
                     throw new Error(responseData.error || 'Error al obtener datos');
