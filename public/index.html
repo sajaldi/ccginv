@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -45,7 +46,8 @@
             text-align: left;
         }
 
-        th, td {
+        th,
+        td {
             padding: 1rem;
             border-bottom: 1px solid var(--border);
         }
@@ -72,8 +74,39 @@
             padding: 2rem;
             text-align: center;
         }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1.5rem;
+            gap: 1rem;
+            background: #f8fafc;
+            border-top: 1px solid var(--border);
+        }
+
+        .pagination button {
+            padding: 0.5rem 1rem;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .pagination button:disabled {
+            background-color: #cbd5e1;
+            cursor: not-allowed;
+        }
+
+        .pagination #pageInfo {
+            font-weight: 500;
+            color: #475569;
+        }
     </style>
 </head>
+
 <body>
     <h1>Panel de Activos</h1>
     <div class="container">
@@ -88,17 +121,32 @@
                 <!-- Data will be inserted here -->
             </tbody>
         </table>
+        <div class="pagination">
+            <button id="prevBtn" onclick="changePage(-1)">Anterior</button>
+            <span id="pageInfo">Página 1</span>
+            <button id="nextBtn" onclick="changePage(1)">Siguiente</button>
+        </div>
     </div>
 
     <script>
-        async function fetchActivos() {
+        let currentPage = 1;
+        const limit = 50;
+        let totalPages = 1;
+
+        async function fetchActivos(page = 1) {
             try {
-                const response = await fetch('/activos');
+                const response = await fetch(`/activos?page=${page}&limit=${limit}`);
                 if (!response.ok) throw new Error('Error al obtener datos');
-                
-                const data = await response.json();
+
+                const { data, meta } = await response.json();
                 const tableBody = document.getElementById('tableBody');
                 const tableHeader = document.getElementById('tableHeader');
+
+                currentPage = meta.currentPage;
+                totalPages = meta.totalPages;
+                document.getElementById('pageInfo').innerText = `Página ${currentPage} de ${totalPages} (${meta.totalItems} registros)`;
+                document.getElementById('prevBtn').disabled = currentPage <= 1;
+                document.getElementById('nextBtn').disabled = currentPage >= totalPages;
 
                 if (data.length === 0) {
                     tableBody.innerHTML = '<tr><td colspan="100%" class="loading">No se encontraron activos.</td></tr>';
@@ -123,7 +171,15 @@
             }
         }
 
+        function changePage(delta) {
+            const newPage = currentPage + delta;
+            if (newPage >= 1 && newPage <= totalPages) {
+                fetchActivos(newPage);
+            }
+        }
+
         fetchActivos();
     </script>
 </body>
+
 </html>

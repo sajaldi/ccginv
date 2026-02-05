@@ -1,10 +1,15 @@
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '.env') });
 const express = require('express');
 const cors = require('cors');
 const db = require('./db');
-require('dotenv').config();
 
 const app = express();
 const port = process.env.PORT || 3001;
+
+console.log('--- Startup Config ---');
+console.log('Remote Host:', process.env.PG_HOST);
+console.log('Remote DB:', process.env.PG_DATABASE);
 
 app.use(cors());
 app.use(express.json());
@@ -14,13 +19,32 @@ app.get('/', (req, res) => {
     res.send('Server is running');
 });
 
-// Endpoint to get all assets (activos)
+// Endpoint to get all assets (activos) with pagination
 app.get('/activos', async (req, res) => {
     try {
-        const result = await db.query('SELECT * FROM activos');
-        res.json(result.rows);
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 50;
+        const offset = (page - 1) * limit;
+
+        // Get total count for pagination metadata
+        const countResult = await db.query('SELECT COUNT(*) FROM activos');
+        const totalItems = parseInt(countResult.rows[0].count);
+        const totalPages = Math.ceil(totalItems / limit);
+
+        // Get paginated data
+        const result = await db.query('SELECT * FROM activos ORDER BY id LIMIT $1 OFFSET $2', [limit, offset]);
+
+        res.json({
+            data: result.rows,
+            meta: {
+                totalItems,
+                totalPages,
+                currentPage: page,
+                limit
+            }
+        });
     } catch (err) {
-        console.error(err.message);
+        console.error('Error executing query:', err.message);
         res.status(500).send('Server Error');
     }
 });
