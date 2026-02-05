@@ -54,8 +54,8 @@ app.get('/activos', async (req, res) => {
             }
         });
     } catch (err) {
-        console.error('Error executing query:', err.message);
-        res.status(500).send('Server Error');
+        console.error('DATABASE ERROR:', err);
+        res.status(500).json({ error: err.message });
     }
 });
 

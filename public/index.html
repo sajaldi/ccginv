@@ -136,9 +136,13 @@
         async function fetchActivos(page = 1) {
             try {
                 const response = await fetch(`/activos?page=${page}&limit=${limit}`);
-                if (!response.ok) throw new Error('Error al obtener datos');
+                const responseData = await response.json();
 
-                const { data, meta } = await response.json();
+                if (!response.ok) {
+                    throw new Error(responseData.error || 'Error al obtener datos');
+                }
+
+                const { data, meta } = responseData;
                 const tableBody = document.getElementById('tableBody');
                 const tableHeader = document.getElementById('tableHeader');
 
