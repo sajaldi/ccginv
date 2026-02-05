@@ -17,6 +17,13 @@ if (process.env.DATABASE_URL) {
 
 app.use(cors());
 app.use(express.json());
+
+// Log all requests
+app.use((req, res, next) => {
+    console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+    next();
+});
+
 app.use(express.static('public'));
 
 // Health check for Coolify
