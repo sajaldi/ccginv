@@ -8,8 +8,12 @@ const app = express();
 const port = process.env.PORT || 3001;
 
 console.log('--- Startup Config ---');
-console.log('Remote Host:', process.env.PG_HOST);
-console.log('Remote DB:', process.env.PG_DATABASE);
+if (process.env.DATABASE_URL) {
+    console.log('Using DATABASE_URL for connection');
+} else {
+    console.log('Remote Host:', process.env.PG_HOST);
+    console.log('Remote DB:', process.env.PG_DATABASE);
+}
 
 app.use(cors());
 app.use(express.json());
